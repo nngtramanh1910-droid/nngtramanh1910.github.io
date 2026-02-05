@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bếp 10A1</title>
+
+<style>
+body{margin:0;font-family:Arial;background:#b40000;color:#fff}
+.container{max-width:1000px;margin:auto;padding:20px}
+h1,h2{text-align:center;color:#ffd966}
+
+.tabs{display:flex;justify-content:center;gap:10px;margin:20px 0}
+.tab{padding:10px 20px;border-radius:20px;background:#8b0000;cursor:pointer;font-weight:bold}
+.tab.active{background:#ffd966;color:#8b0000}
+
+.content{display:none}
+.content.active{display:block}
+
+.menu{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+}
+.item{
+  background:#8b0000;
+  padding:15px;
+  border-radius:12px;
+  text-align:center;
+}
+.item img{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+form{
+  background:#8b0000;
+  padding:20px;
+  border-radius:12px;
+  margin-top:30px;
+}
+label{display:block;margin-top:12px;font-weight:bold}
+select,input,button{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  border-radius:6px;
+  border:none;
+}
+button{
+  background:#ffd966;
+  color:#8b0000;
+  font-weight:bold;
+  margin-top:15px;
+  cursor:pointer;
+}
+
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{border:1px solid #ffd966;padding:6px;text-align:center}
+
+/* ===== MOBILE ===== */
+@media (max-width: 600px) {
+
+  body {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  .tabs {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tab {
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .menu {
+    grid-template-columns: 1fr;
+  }
+
+  .item img {
+    height: 120px;
+  }
+
+  form {
+    padding: 15px;
+  }
+
+  select,
+  input,
+  button {
+    font-size: 16px;
+    padding: 12px;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  th, td {
+    padding: 4px;
+  }
+}
+
+</style>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTr46c4M2XdwNd8M7mLvWQQEQ4qGe1wn4",
+      authDomain: "bep-10a1.firebaseapp.com",
+      databaseURL: "https://bep-10a1-default-rtdb.firebaseio.com",
+      projectId: "bep-10a1",
+      storageBucket: "bep-10a1.firebasestorage.app",
+      messagingSenderId: "1030275269286",
+      appId: "1:1030275269286:web:7b9ba2de345171d130ea67"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+  </script>
+
+</head>
+
+<body>
+<div class="container">
+<h1>BẾP CỦA 10A1</h1>
+
+<div class="tabs">
+  <div class="tab active" onclick="openTab('order',this)">Đặt món</div>
+  <div class="tab" onclick="openTab('stat',this)">Thống kê</div>
+  <div class="tab" onclick="openTab('history',this)">Lịch sử</div>
+  <div class="tab" onclick="openTab('rate',this)">Đánh giá</div>
+</div>
+
+<!-- ===== ĐẶT MÓN ===== -->
+<div id="order" class="content active">
+
+  <div class="menu">
+    <div class="item">
+      <img src="https://i.pinimg.com/736x/6b/4f/6d/6b4f6d7684410bca24bc260cd9ca767c.jpg">
+      <h3>Bắp xào</h3>
+      <p>Nhỏ: 10.000đ</p>
+      <p>Lớn: 15.000đ</p>
+    </div>
+
+    <div class="item">
+      <img src="https://i.pinimg.com/1200x/85/e7/bf/85e7bf165cf04b34af87a1eb7d2468b1.jpg">
+      <h3>Xoài lắc</h3>
+      <p>5.000đ</p>
+    </div>
+
+    <div class="item">
+      <img src="https://i.pinimg.com/1200x/fa/98/0c/fa980cb323a1a8f14aed810fe759200b.jpg">
+      <h3>Trà tắc</h3>
+      <p>5.000đ</p>
+    </div>
+  </div>
+
+  <form onsubmit="addOrder(event)">
+    <h2>Đặt món</h2>
+
+    <label>Lớp</label>
+    <select id="class" onchange="loadStudents()" required>
+      <option value="">-- Chọn lớp --</option>
+    </select>
+
+    <label>Tên</label>
+    <select id="student" required>
+      <option value="">-- Chọn tên --</option>
+    </select>
+
+    <label>Món</label>
+    <select id="food">
+      <option value="bap-nho">Bắp xào (nhỏ)</option>
+      <option value="bap-lon">Bắp xào (lớn)</option>
+      <option value="xoai">Xoài lắc</option>
+      <option value="tra">Trà tắc</option>
+    </select>
+
+    <label>Số lượng</label>
+    <input type="number" id="qty" min="1" value="1">
+
+   <label>Ghi chú</label>
+   <input type="text" id="note" placeholder="Ví dụ: ít đá, cay hơn, giao sau...">
+
+    <button>Đặt món</button>
+  </form>
+
+</div>
+
+<!-- ===== THỐNG KÊ ===== -->
+<div id="stat" class="content">
+  <h2>Thống kê</h2>
+  <p>Bắp nhỏ: <span id="bap-nho">0</span></p>
+  <p>Bắp lớn: <span id="bap-lon">0</span></p>
+  <p>Xoài: <span id="xoai">0</span></p>
+  <p>Trà: <span id="tra">0</span></p>
+</div>
+
+<!-- ===== LỊCH SỬ ===== -->
+<div id="history" class="content">
+  <h2>Lịch sử đặt hàng</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Tên</th>
+        <th>Lớp</th>
+        <th>Món</th>
+        <th>SL</th>
+        <th>Ghi chú</th>
+        <th>Thời gian</th>
+       </tr>
+    </thead>
+    <tbody id="history-body"></tbody>
+  </table>
+</div>
+
+<!-- ===== ĐÁNH GIÁ ===== -->
+<div id="rate" class="content">
+  <h2>Đánh giá món ăn</h2>
+
+  <form onsubmit="addReview(event)">
+    <label>Tên</label>
+    <input id="review-name" required>
+
+    <label>Lớp</label>
+    <input id="review-class" required>
+
+    <label>Món</label>
+    <select id="review-food">
+      <option value="Bắp xào">Bắp xào</option>
+      <option value="Xoài lắc">Xoài lắc</option>
+      <option value="Trà tắc">Trà tắc</option>
+    </select>
+
+    <label>Đánh giá (1–5 sao)</label>
+    <select id="review-star">
+      <option value="5">★★★★★</option>
+      <option value="4">★★★★</option>
+      <option value="3">★★★</option>
+      <option value="2">★★</option>
+      <option value="1">★</option>
+    </select>
+
+    <label>Nhận xét</label>
+    <input id="review-text" placeholder="Viết nhận xét ngắn">
+
+    <button>Gửi đánh giá</button>
+  </form>
+
+  <h3>Nhận xét</h3>
+  <ul id="review-list"></ul>
+</div>
+
+
+</div>
+
+<script>
+const studentsByClass = {
+ "10A1": [
+    "Nguyễn Ngọc Trâm Anh","Phạm Nguyễn Minh Anh","Trần Lan Anh","Trần Nguyễn Minh Anh",
+    "Hà Ngọc Bình","Phan Huỳnh Điệp","Nguyễn Quang Hà","Trần Nguyễn Ngọc Hân",
+    "Mai Gia Huy","Dương Ngọc Huyền","Trần Như Huỳnh","Huỳnh Thị Mỹ Kiều",
+    "Lê Tường Lam","Phạm Thị Mỹ Linh","Nguyễn Phương Nghi","Nguyễn Kim Ngọc",
+    "Trần Lê Thảo Nguyên","Lê Nguyễn Thảo Như","Lê Thị Quỳnh Như","Trịnh Tâm Như",
+    "Bùi Thị Diễm Phúc","Nguyễn Gia Phúc","Châu Thị Hồng Phượng","Huỳnh Thị Tú Sương",
+    "Bùi Phương Thảo","Trần Thị Kim Thi","Nguyễn Thị Hoài Thương","Mang Ngọc Tiền",
+    "Cao Thị Bích Trâm","Trần Thị Kim Tuyền","Nguyễn Lê Thanh Vân",
+    "Nguyễn Thị Thảo Vy","Trần Thị Phúc Yên","Trần Hoàng Yến"
+  ],
+
+  "10A2": [
+    "Hồ Quỳnh Anh","Phạm Hồng Anh","Phạm Trần Gia Bảo","Võ Lê Duy Bảo",
+    "Nguyễn Hoàng Duy","Trần Hoàng Gia","Huỳnh Phạm Thanh Hài","Dương Gia Hân",
+    "Tạ Gia Hân","Trần Lê Ngọc Hân","Trần Thị Ngọc Hồng","Nguyễn Đăng Khánh",
+    "Lê Hoàng Khôi","Bùi Anh Kiệt","Nguyễn Tiền Lợi","Huỳnh Khánh Ngọc",
+    "Nguyễn Bảo Ngọc","Vương Phan Như Ngọc","Trần Tín Nhân","Võ Thành Nhân",
+    "Trần Đặng Ngọc Như","Lê Anh Phát","Đinh Văn Yến Phi","Huỳnh Kim Phụng",
+    "Huỳnh Văn Tài","Huỳnh Văn Thành","Lâm Nguyễn Chí Thành","Phạm Thị Phương Thảo",
+    "Đoàn Minh Thiện","Tô Thị Minh Thơ","Ngô Diễm Thu","Huỳnh Đức Tiến",
+    "Nguyễn Mạnh Tiến","Đặng Thị Cẩm Tú","Biện Duy Tường"
+  ],
+
+  "10A3": [
+    "Nguyễn Xuân An","Huỳnh Ngọc Lan Anh","Lê Khắc Thiên Ân","Nguyễn Hồ Thiên Bảo",
+    "Trà Quốc Bảo","Nguyễn Trung Chánh","Nguyễn Thị Hồng Đào","Nguyễn Thành Đạt",
+    "Nguyễn Trần Hải Đăng","Lê Gia Hảo","Nguyễn Ngọc Hân","Liêu Quốc Huy",
+    "Lê Minh Kha","Dương Anh Kiệt","Võ Lâm Anh Kiệt","Lê Phù Gia Kỳ",
+    "Trịnh Nguyễn Tường Lam","Nguyễn Hoàng Lan","Nguyễn Thị Cẩm Loan",
+    "Nguyễn Vũ Luân","Nguyễn Quỳnh Mai","Nguyễn Minh Mẫn","Huỳnh Văn Mộng",
+    "Huỳnh Nguyễn Diễm My","Lý Thị Kiều My","Nguyễn Hiếu Nghĩa",
+    "Nguyễn Ngọc Thảo Nguyên","Trần Thị Nhanh","Nguyễn Lê Quốc Quyền",
+    "Hồ Văn Thịnh","Mai Nguyễn Phước Thọ","Ngô Huỳnh Thuận","Cao Thị Khánh Thư",
+    "Ngô Hoàng Kỳ Thư","Nguyễn Thị Kim Thy","Phạm Thị Thủy Tiên","Hồ Thanh Toàn",
+    "Võ Thị Hồng Trang","Đặng Thị Huỳnh Trâm","Nguyễn Thị Ngọc Trâm",
+    "Trần Thị Mỹ Trâm","Ngô Thị Quế Trân","Nguyễn Thị Bảo Trân",
+    "Lê Thị Cẩm Tú","Trịnh Thị Ánh Tuyết","Nguyễn Trịnh Tường"
+  ],
+
+  "10A4": [
+    "Nguyễn Thị Kim Anh","Phạm Hoài Ân","Ngô Khánh Băng","Nguyễn Thị Khánh Băng",
+    "Huỳnh Thị Trân Châu","Nguyễn Thị Bảo Châu","Nguyễn Huỳnh Kim Cương",
+    "Nguyễn Khương Duy","Lê Thành Đạt","Trần À Đức","Nguyễn Thái Hà",
+    "Nguyễn Thị Ngọc Hà","Ngô Quốc Hải","Phan Trần Hạo","Nguyễn Thị Mỹ Hoa",
+    "Mang Văn Hùng","Nguyễn Gia Huy","Nguyễn Duy Khang","Nguyễn Tuấn Khang",
+    "Nguyễn Tuấn Kiệt","Hồ Gia Lộc","Nguyễn Thị Cẩm Ly","Lâm Hoàng Minh",
+    "Nguyễn Trộng Nam","Nguyễn Thu Ngân","Trần Tấn Nguyên","Mai Huỳnh Như",
+    "Nguyễn Trường Phát","Nguyễn Thị Kim Phúc","Nguyễn Thị Trúc Phượng",
+    "Lại Thanh Sang","Trịnh Quốc Thái","Lê Quang Thịnh","Trần Thị Ngọc Thoại",
+    "Trần Thanh Tiến","Nguyễn Thành Til","Lê Chung Tình","Nguyễn Xoan Trà",
+    "Nguyễn Lê Cát Tường","Lê Trần Quốc Việt","Bùi Lê Bảo Vy","Bùi Thị Ngọc Vy",
+    "Lê Thị Kiều Vy","Nguyễn Nhật Hạ Vy","Trần Ngọc Khánh Vy"
+  ],
+
+  "10A5": [
+    "Trần Tuấn Anh","Bùi Quốc Bảo","Cao Thiên Bằng","Nguyễn Thị Ngọc Diễm",
+    "Trần Thị Thúy Diễm","Nguyễn Hoàng Du","Nguyễn Trọng Du","Lê Khánh Duy",
+    "Nguyễn Thành Duy","Trương Thị Thùy Duyên","Nguyễn Thành Đạt","Vũ Tiến Đạt",
+    "Bùi Lê Hòa Đồng","Nguyễn Thị Ngọc Hân","Đặng Hoài Hiệp","Nguyễn Đặng Quốc Huy",
+    "Nguyễn Võ Nhật Huy","Tống Đức Minh Khang","Nguyễn Thanh Lâm",
+    "Phan Thị Cẩm Ly","Nguyễn Hoàng Mạnh","Nguyễn Lê Hải Nam",
+    "Trần Thị Kim Ngân","Nguyễn Thị Hồng Ngọc","Huỳnh Trọng Nguyễn",
+    "Nguyễn Bùi Yến Nhi","Nguyễn Minh Phát","Thái Lương Anh Quân","Võ Thanh Quân",
+    "Nguyễn Thành","Nguyễn Ngọc Thiện","Huỳnh Minh Tiến","Phạm Hồng Tính",
+    "Lê Thị Ngọc Trâm","Đặng Minh Triết","Nguyễn Thị Thanh Tuyền",
+    "Lê Ngọc Khánh Vy","Nguyễn Ngô Nhật Vy"
+  ],
+
+  "10A6": [
+    "Lê Nguyễn Huỳnh Anh","Nguyễn Ngọc Trâm Anh","Nguyễn Thị Hồng Anh",
+    "Hồ Bảo Châu","Phạm Minh Châu","Nguyễn Đinh Mi Du","Nguyễn Minh Đăng",
+    "Phạm Minh Đăng","Lê Ngọc Hà","Phan Thị Ngọc Hoa","Nguyễn Quốc Huy",
+    "Phạm Duy Khang","Nguyễn Vũ Khánh","Lê Anh Tuấn Kiệt",
+    "Nguyễn Thái Thùy Lâm","Hồ Quỳnh Mai","Mang Hoàng Nam","Huỳnh Kim Ngân",
+    "Nguyễn Thanh Ngọc","Bùi Thị Thảo Nguyên","Nguyễn Thị Thảo Nguyên",
+    "Nguyễn Thị Quỳnh Như","Phạm Anh Thư","Nguyễn Ngọc Tiên",
+    "Vỏ Thị Mỷ Tiên","Hồ Thị Huyền Trân","Võ Thị Huyền Trân","Nguyễn Minh Trí",
+    "Trần Ngọc Như Trúc","Nguyễn Phan Mỹ Tú","Lê Thị Hồng Vy",
+    "Nguyễn Huỳnh Thảo Vy","Nguyễn Trần Tường Vy","Trần Triệu Vy",
+    "Nguyễn Thị Như Ý","Nguyễn Thị Ngọc Yến","Trần Nguyễn Hoàng Yến"
+  ]
+}
+
+function openTab(id,el){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+
+}
+
+const classSelect=document.getElementById("class");
+for(let c in studentsByClass){
+  classSelect.innerHTML+=`<option>${c}</option>`;
+}
+
+function loadStudents(){
+  const cls=classSelect.value;
+  const stu=document.getElementById("student");
+  stu.innerHTML='<option value="">-- Chọn tên --</option>';
+  if(!cls) return;
+  studentsByClass[cls].forEach(s=>{
+    stu.innerHTML+=`<option>${s}</option>`;
+  });
+}
+
+function addOrder(e){
+  e.preventDefault();
+
+  const order = {
+    class: classSelect.value,
+    name: document.getElementById("student").value,
+    food: document.getElementById("food").value,
+    qty: Number(document.getElementById("qty").value),
+    note: document.getElementById("note").value,
+    time: Date.now()
+  };
+
+  database.ref("orders").push(order)
+    .then(() => {
+      alert("Đặt món thành công!");
+      e.target.reset();
+    })
+    .catch(err => {
+      alert("Lỗi: " + err.message);
+    });
+}
+
+database.ref("orders").on("value", snapshot => {
+  const data = snapshot.val();
+  if(!data) return;
+
+  const count = {
+    "bap-nho":0,
+    "bap-lon":0,
+    "xoai":0,
+    "tra":0
+  };
+
+  const body = document.getElementById("history-body");
+  body.innerHTML = "";
+
+  Object.values(data).forEach(o => {
+    count[o.food] += o.qty;
+
+    body.innerHTML += `
+      <tr>
+        <td>${o.name}</td>
+        <td>${o.class}</td>
+        <td>${o.food}</td>
+        <td>${o.qty}</td>
+        <td>${o.note || ""}</td>
+        <td>${new Date(o.time).toLocaleString()}</td>
+      </tr>
+    `;
+  });
+
+  for(let k in count){
+    if(document.getElementById(k))
+      document.getElementById(k).innerText = count[k];
+  }
+});
+
+function addReview(e){
+  e.preventDefault();
+
+  const review = {
+    name: document.getElementById("review-name").value,
+    class: document.getElementById("review-class").value,
+    food: document.getElementById("review-food").value,
+    star: Number(document.getElementById("review-star").value),
+    text: document.getElementById("review-text").value,
+    time: Date.now()
+  };
+
+  database.ref("reviews").push(review)
+    .then(() => {
+      alert("Đã gửi đánh giá!");
+      e.target.reset();
+    });
+}
+
+database.ref("reviews").on("value", snapshot => {
+  const data = snapshot.val();
+  const ul = document.getElementById("review-list");
+  ul.innerHTML = "";
+  if(!data) return;
+
+  Object.values(data).reverse().forEach(r => {
+    ul.innerHTML += `
+      <li>
+        <b>${r.name}</b> (${r.class}) – ${r.food} – ${"★".repeat(r.star)}
+        <br>${r.text || ""}
+      </li>
+    `;
+  });
+});
+
+</script>
+</body>
+</html>
