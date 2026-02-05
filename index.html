@@ -281,9 +281,16 @@ const studentsByClass = {
   ]
 }
 
-let orders = JSON.parse(localStorage.getItem("orders")) || {
-  "bap-nho":0,"bap-lon":0,"xoai":0,"tra":0
+const defaultOrders = {
+  "bap-nho": 0,
+  "bap-lon": 0,
+  "xoai": 0,
+  "tra": 0
 };
+
+let orders = JSON.parse(localStorage.getItem("orders")) || {};
+orders = { ...defaultOrders, ...orders };
+
 let history = JSON.parse(localStorage.getItem("history")) || [];
 
 const defaultOrders = {
@@ -401,3 +408,4 @@ renderReviews();
 </script>
 </body>
 </html>
+
